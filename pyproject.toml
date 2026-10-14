@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cap-eval"
+version = "0.1.0"
+description = "CAP: an NLI-based metric for judging QA answer correctness"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "scipy>=1.11",
+    "tqdm>=4.66",
+    "torch>=2.1",
+    "transformers>=5.0,<6",
+    "sentencepiece>=0.1.99",
+    "protobuf>=4.25",
+]
+
+[project.optional-dependencies]
+# scripts/train_statement_model.py
+train = [
+    "accelerate>=0.26",
+    "datasets>=2.18",
+    "scikit-learn>=1.3",
+    "sacrebleu>=2.4",
+    "rouge-score>=0.1.2",
+]
+# scripts/score_baselines.py (COMET is separate: it pins its own torch/lightning versions)
+baselines = ["nltk>=3.8.2", "rouge-score>=0.1.2", "bert-score>=0.3.13"]
+comet = ["unbabel-comet>=2.2"]
+dev = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

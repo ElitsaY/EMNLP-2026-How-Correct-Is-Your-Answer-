@@ -1,13 +1,3 @@
-pandas
-numpy
-scipy
-torch
-transformers
-datasets
-scikit-learn
-tqdm
-nltk
-rouge-score
-bert-score
-sacrebleu
-unbabel-comet
+# Installs the package with everything needed for the full pipeline.
+# Exact versions used for a run are recorded in its *.manifest.json.
+-e .[train,baselines,comet,dev]
