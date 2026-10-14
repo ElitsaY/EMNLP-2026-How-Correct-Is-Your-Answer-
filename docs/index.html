@@ -4,7 +4,342 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How Correct Is Your Answer? | CAP</title>
-<meta name="description" content="CAP (Context-Aware Precision): a semantic correctness framework for open QA evaluation. Findings of EMNLP 2026.">
+<meta name="description" content="CAP (Context-Aware Precision) is a reference-based metric for evaluating semantic correctness in open QA. The work treats semantic correctness as an ordered taxonomy of eight classes, with monotonicity as the evaluation criterion: more correct answers should receive higher metric scores.">
+<link rel="canonical" href="https://elitsay.github.io/EMNLP-2026-How-Correct-Is-Your-Answer-/">
+<link rel="alternate" type="text/plain" href="llms.txt" title="llms.txt">
+<link rel="sitemap" type="application/xml" href="sitemap.xml">
+<!-- Google Scholar / Highwire Press tags -->
+<meta name="citation_title" content="How Correct Is Your Answer? A Semantic Correctness Framework for Open QA Evaluation">
+<meta name="citation_author" content="Yotkova, Elitsa">
+<meta name="citation_author" content="Kastreva, Violeta">
+<meta name="citation_author" content="Velkov, Petar">
+<meta name="citation_author" content="Boyanov, Hristo">
+<meta name="citation_author" content="Dimitrov, Dimitar">
+<meta name="citation_author" content="Nakov, Preslav">
+<meta name="citation_author" content="Koychev, Ivan">
+<meta name="citation_publication_date" content="2026">
+<meta name="citation_conference_title" content="Findings of the Association for Computational Linguistics: EMNLP 2026">
+<meta name="citation_pdf_url" content="https://arxiv.org/pdf/2609.01369">
+<meta name="citation_arxiv_id" content="2609.01369">
+<meta name="citation_language" content="en">
+<meta name="citation_keywords" content="open QA evaluation; answer correctness; semantic correctness; evaluation metrics; natural language inference; LLM evaluation; question answering; monotonicity; CAP">
+<!-- schema.org: paper, datasets and code -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "ScholarlyArticle",
+      "@id": "https://elitsay.github.io/EMNLP-2026-How-Correct-Is-Your-Answer-/#paper",
+      "headline": "How Correct Is Your Answer? A Semantic Correctness Framework for Open QA Evaluation",
+      "name": "How Correct Is Your Answer? A Semantic Correctness Framework for Open QA Evaluation",
+      "description": "CAP (Context-Aware Precision) is a reference-based metric for evaluating semantic correctness in open QA. The work treats semantic correctness as an ordered taxonomy of eight classes, with monotonicity as the evaluation criterion: more correct answers should receive higher metric scores. Free-form answers often have no explicit correctness label, and binary accept/reject judgments hide important distinctions: answers can be partial, overinclusive, unsupported, contradictory, or based on a false premise. We contribute (1) a taxonomy of 8 ordered semantic correctness classes (exact, equivalent, alternative correct, overinclusive valid, partial, overinclusive invalid, invalid, contradictory) and the CAP-Correctness dataset of 8.8k examples; (2) CAP (Context-Aware Precision), a reference-based metric that turns question-answer pairs into declarative statements and scores them with bidirectional weighted NLI, plus CAP-Statements, 11k QA-to-statement examples; and (3) a diagnostic protocol that checks monotonicity criteria for correctness and reveals metric failure modes. CAP reaches 77.70% pairwise accuracy against the taxonomy ordering, ahead of COMET (61.10), BERTScore (56.18), ROUGE-L (55.35), METEOR (53.71) and BLEU (51.57), with 4/25 monotonicity violations versus 9/25 for COMET and 11/25 for BERTScore. In 3,000 responses from 3 LLM families, all eight taxonomy classes appeared and CAP largely preserved the semantic ordering.",
+      "author": [
+        {
+          "@type": "Person",
+          "givenName": "Elitsa",
+          "familyName": "Yotkova",
+          "name": "Elitsa Yotkova"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Violeta",
+          "familyName": "Kastreva",
+          "name": "Violeta Kastreva"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Petar",
+          "familyName": "Velkov",
+          "name": "Petar Velkov"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Hristo",
+          "familyName": "Boyanov",
+          "name": "Hristo Boyanov"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Dimitar",
+          "familyName": "Dimitrov",
+          "name": "Dimitar Dimitrov"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Preslav",
+          "familyName": "Nakov",
+          "name": "Preslav Nakov"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Ivan",
+          "familyName": "Koychev",
+          "name": "Ivan Koychev"
+        }
+      ],
+      "sourceOrganization": [
+        {
+          "@type": "Organization",
+          "name": "Sofia University"
+        },
+        {
+          "@type": "Organization",
+          "name": "ETH Zurich"
+        },
+        {
+          "@type": "Organization",
+          "name": "University of Zurich"
+        },
+        {
+          "@type": "Organization",
+          "name": "MBZUAI"
+        }
+      ],
+      "datePublished": "2026",
+      "inLanguage": "en",
+      "keywords": [
+        "open QA evaluation",
+        "answer correctness",
+        "semantic correctness",
+        "evaluation metrics",
+        "natural language inference",
+        "LLM evaluation",
+        "question answering",
+        "monotonicity",
+        "CAP"
+      ],
+      "url": "https://elitsay.github.io/EMNLP-2026-How-Correct-Is-Your-Answer-/",
+      "sameAs": [
+        "https://arxiv.org/abs/2609.01369"
+      ],
+      "image": "https://elitsay.github.io/EMNLP-2026-How-Correct-Is-Your-Answer-/assets/poster_preview.jpg",
+      "isPartOf": {
+        "@type": "PublicationEvent",
+        "name": "Findings of the Association for Computational Linguistics: EMNLP 2026",
+        "location": "Budapest, Hungary"
+      },
+      "encoding": {
+        "@type": "MediaObject",
+        "encodingFormat": "application/pdf",
+        "contentUrl": "https://arxiv.org/pdf/2609.01369"
+      }
+    },
+    {
+      "@type": "Dataset",
+      "@id": "https://elitsay.github.io/EMNLP-2026-How-Correct-Is-Your-Answer-/#cap-correctness",
+      "name": "CAP-Correctness",
+      "description": "8,827 open QA examples (question, gold answer, predicted answer, label) labeled with 8 ordered semantic correctness classes: exact, equivalent, alternative correct, overinclusive valid, partial, overinclusive invalid, invalid, contradictory. Questions come from OpenBookQA, ARC-Easy and MMLU. 1,638 examples are human labeled, with human-LLM agreement of kappa = 0.779. Each row also has generated premise/hypothesis statements for NLI-based scoring.",
+      "url": "https://elitsay.github.io/EMNLP-2026-How-Correct-Is-Your-Answer-/#resources",
+      "sameAs": "https://github.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-/blob/main/data/CAP-Correctness.csv",
+      "creator": [
+        {
+          "@type": "Person",
+          "givenName": "Elitsa",
+          "familyName": "Yotkova",
+          "name": "Elitsa Yotkova"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Violeta",
+          "familyName": "Kastreva",
+          "name": "Violeta Kastreva"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Petar",
+          "familyName": "Velkov",
+          "name": "Petar Velkov"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Hristo",
+          "familyName": "Boyanov",
+          "name": "Hristo Boyanov"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Dimitar",
+          "familyName": "Dimitrov",
+          "name": "Dimitar Dimitrov"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Preslav",
+          "familyName": "Nakov",
+          "name": "Preslav Nakov"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Ivan",
+          "familyName": "Koychev",
+          "name": "Ivan Koychev"
+        }
+      ],
+      "citation": "https://elitsay.github.io/EMNLP-2026-How-Correct-Is-Your-Answer-/#paper",
+      "keywords": [
+        "answer correctness",
+        "open QA",
+        "LLM evaluation",
+        "semantic correctness taxonomy"
+      ],
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "isBasedOn": [
+        "https://allenai.org/data/arc",
+        "https://allenai.org/data/open-book-qa",
+        "https://github.com/hendrycks/test"
+      ],
+      "variableMeasured": [
+        "question",
+        "dataset",
+        "gold_answer",
+        "answer",
+        "hypothesis",
+        "premise",
+        "label_semantic",
+        "label_semantic_manual"
+      ],
+      "distribution": [
+        {
+          "@type": "DataDownload",
+          "encodingFormat": "text/csv",
+          "contentUrl": "https://raw.githubusercontent.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-/main/data/CAP-Correctness.csv"
+        }
+      ]
+    },
+    {
+      "@type": "Dataset",
+      "@id": "https://elitsay.github.io/EMNLP-2026-How-Correct-Is-Your-Answer-/#cap-statements",
+      "name": "CAP-Statements",
+      "description": "11,000 question/answer/statement examples for turning a question-answer pair into a declarative statement, covering 4 question types, with train/dev/test splits for the reformulation model. 1,353 examples were manually checked and 90% were correct.",
+      "url": "https://elitsay.github.io/EMNLP-2026-How-Correct-Is-Your-Answer-/#resources",
+      "sameAs": "https://github.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-/blob/main/data/CAP-Statements.csv",
+      "creator": [
+        {
+          "@type": "Person",
+          "givenName": "Elitsa",
+          "familyName": "Yotkova",
+          "name": "Elitsa Yotkova"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Violeta",
+          "familyName": "Kastreva",
+          "name": "Violeta Kastreva"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Petar",
+          "familyName": "Velkov",
+          "name": "Petar Velkov"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Hristo",
+          "familyName": "Boyanov",
+          "name": "Hristo Boyanov"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Dimitar",
+          "familyName": "Dimitrov",
+          "name": "Dimitar Dimitrov"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Preslav",
+          "familyName": "Nakov",
+          "name": "Preslav Nakov"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Ivan",
+          "familyName": "Koychev",
+          "name": "Ivan Koychev"
+        }
+      ],
+      "citation": "https://elitsay.github.io/EMNLP-2026-How-Correct-Is-Your-Answer-/#paper",
+      "keywords": [
+        "question to statement",
+        "QA reformulation",
+        "declarative statements",
+        "NLI"
+      ],
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "variableMeasured": [
+        "id",
+        "language",
+        "subject",
+        "question",
+        "answer",
+        "statement",
+        "label_question_type"
+      ],
+      "distribution": [
+        {
+          "@type": "DataDownload",
+          "encodingFormat": "text/csv",
+          "contentUrl": "https://raw.githubusercontent.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-/main/data/CAP-Statements.csv"
+        }
+      ]
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "@id": "https://elitsay.github.io/EMNLP-2026-How-Correct-Is-Your-Answer-/#code",
+      "name": "cap_eval",
+      "description": "Python package and scripts for the CAP metric: CAPScorer, statement generation, benchmarking against BLEU, ROUGE-L, METEOR, BERTScore and COMET, and the statistics used in the paper.",
+      "codeRepository": "https://github.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-",
+      "programmingLanguage": "Python",
+      "license": "https://opensource.org/licenses/MIT",
+      "author": [
+        {
+          "@type": "Person",
+          "givenName": "Elitsa",
+          "familyName": "Yotkova",
+          "name": "Elitsa Yotkova"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Violeta",
+          "familyName": "Kastreva",
+          "name": "Violeta Kastreva"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Petar",
+          "familyName": "Velkov",
+          "name": "Petar Velkov"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Hristo",
+          "familyName": "Boyanov",
+          "name": "Hristo Boyanov"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Dimitar",
+          "familyName": "Dimitrov",
+          "name": "Dimitar Dimitrov"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Preslav",
+          "familyName": "Nakov",
+          "name": "Preslav Nakov"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Ivan",
+          "familyName": "Koychev",
+          "name": "Ivan Koychev"
+        }
+      ],
+      "citation": "https://elitsay.github.io/EMNLP-2026-How-Correct-Is-Your-Answer-/#paper"
+    }
+  ]
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
@@ -635,6 +970,7 @@ scorer.score(
 <footer>
   <img src="assets/capybara_small.png" alt="">
   Sofia University • ETH Zurich • University of Zurich • MBZUAI
+  <p style="margin: 6px 0 0">For AI agents and tools: <a href="llms.txt">llms.txt</a> · <a href="llms-full.txt">llms-full.txt</a></p>
 </footer>
 
 <script>

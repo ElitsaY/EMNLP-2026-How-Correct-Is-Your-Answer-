@@ -1,0 +1,37 @@
+# How Correct Is Your Answer? A Semantic Correctness Framework for Open QA Evaluation
+
+> Findings of EMNLP 2026. Semantic correctness as an ordered taxonomy, with monotonicity as the evaluation criterion. CAP (Context-Aware Precision) is a reference-based metric for evaluating semantic correctness in open QA: it turns (question, gold answer) and (question, predicted answer) into declarative statements and scores them with bidirectional weighted NLI, giving CAP(g, p) in [0, 1].
+
+Authors: Elitsa Yotkova*, Violeta Kastreva*, Petar Velkov, Hristo Boyanov, Dimitar Dimitrov, Preslav Nakov, Ivan Koychev (*equal contribution). Sofia University, ETH Zurich, University of Zurich, MBZUAI.
+
+Key facts:
+
+- Taxonomy of 8 ordered correctness classes: exact, equivalent, alternative correct, overinclusive valid, partial, overinclusive invalid, invalid, contradictory.
+- Monotonicity criteria: exact ≈ equivalent ≈ alternative-correct ≥ overinclusive_valid > partial > overinclusive_invalid > invalid ≥ contradictory. More correct classes should receive higher metric scores.
+- CAP: D(s_g → s_p) = P_entailment(s_g → s_p) + λ·P_neutral(s_g → s_p); CAP(s_g, s_p) = α·D(s_g → s_p) + (1 − α)·D(s_p → s_g), with α = 0.85 and λ = 0.30.
+- Pairwise accuracy against the taxonomy ordering: CAP 77.70, COMET 61.10, BERTScore 56.18, ROUGE-L 55.35, METEOR 53.71, BLEU 51.57 (chance 50). Monotonicity violations: CAP 4/25, COMET 9/25, BERTScore 11/25.
+- Code is MIT licensed. Original annotations are CC BY 4.0; questions and answers from ARC-Easy, OpenBookQA and MMLU keep their original licenses.
+
+## Paper
+
+- [arXiv abstract page](https://arxiv.org/abs/2609.01369): arXiv:2609.01369
+- [Paper PDF](https://arxiv.org/pdf/2609.01369): full paper
+- [Poster PDF](https://github.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-/blob/main/assets/poster.pdf): EMNLP 2026 poster, Budapest
+
+## Code and data
+
+- [GitHub repository](https://github.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-): code, data and instructions to reproduce the results
+- [CAP-Correctness.csv](https://raw.githubusercontent.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-/main/data/CAP-Correctness.csv): 8,827 rows of question, gold answer, predicted answer, correctness label and premise/hypothesis statements; 1,638 human labeled, κ = .779 human–LLM agreement
+- [CAP-Correctness-splits.csv](https://raw.githubusercontent.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-/main/data/CAP-Correctness-splits.csv): row_id → validation (1,000) / test (7,827) split used in the paper
+- [CAP-Statements.csv](https://raw.githubusercontent.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-/main/data/CAP-Statements.csv): 11,000 question/answer/statement examples, 4 question types; 1,353 manually checked, 90% correct
+- [cap_eval package](https://github.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-/tree/main/src/cap_eval): `CAPScorer` and statement generation
+- [README](https://raw.githubusercontent.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-/main/README.md): installation, usage and reproduction steps
+
+## Docs
+
+- [llms-full.txt](https://elitsay.github.io/EMNLP-2026-How-Correct-Is-Your-Answer-/llms-full.txt): the full poster content as plain text, with formulas, results, usage and BibTeX
+- [Project page](https://elitsay.github.io/EMNLP-2026-How-Correct-Is-Your-Answer-/): human-readable overview
+
+## Optional
+
+- [Data licenses](https://github.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-/blob/main/DATA_LICENSES.md): license terms for each part of the data

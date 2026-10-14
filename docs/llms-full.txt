@@ -1,0 +1,177 @@
+# How Correct Is Your Answer? A Semantic Correctness Framework for Open QA Evaluation
+
+> Findings of EMNLP 2026. Semantic correctness as an ordered taxonomy, with monotonicity as the evaluation criterion.
+
+- Authors: Elitsa Yotkova*, Violeta Kastreva*, Petar Velkov, Hristo Boyanov, Dimitar Dimitrov, Preslav Nakov, Ivan Koychev (*equal contribution)
+- Affiliations: Sofia University, ETH Zurich, University of Zurich, MBZUAI
+- Paper: https://arxiv.org/abs/2609.01369 (PDF: https://arxiv.org/pdf/2609.01369)
+- Code and data: https://github.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-
+- Project page: https://elitsay.github.io/EMNLP-2026-How-Correct-Is-Your-Answer-/
+- Poster: https://github.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-/blob/main/assets/poster.pdf
+
+This file follows the content of the EMNLP 2026 poster. For exact wording, definitions and all experiments, cite and read the paper.
+
+## Why is open QA evaluation hard?
+
+- Free-form answers often have no explicit correctness label.
+- A gold answer gives us a semantic anchor, not a string to match.
+- Binary accept/reject judgments hide important distinctions.
+- Answers can be partial, overinclusive, unsupported, contradictory, or based on a false premise.
+
+## Correctness is not binary
+
+Example. Question: "Name 3 cities in Europe". Gold answer: "Paris, Rome, Sofia".
+
+| Predicted answer | Class |
+|---|---|
+| Paris, Berlin, Tokyo | overinclusive invalid (Tokyo is not in Europe) |
+| Oslo, Amsterdam | partial |
+| Paris, Berlin, Sofia, all of which have a population over 1.2 million people | overinclusive valid |
+
+Not every answer is simply correct or wrong. Correctness comes in different semantic forms and degrees.
+
+## Taxonomy: how should we classify correctness instead?
+
+Eight classes, ordered from correct (1) to wrong (8):
+
+| # | Class | Definition |
+|---|---|---|
+| 1 | Exact | Prediction is identical to the gold answer. |
+| 2 | Equivalent | Rephrased or semantically equivalent to the gold answer. |
+| 3 | Alternative correct | Different answer, but still correct under the question. |
+| 4 | Overinclusive valid | Contains the correct answer plus extra valid information. |
+| 5 | Partial | Contains only part of the required information. |
+| 6 | Overinclusive invalid | Contains the correct answer plus extra invalid information. |
+| 7 | Invalid | Semantically incorrect answer. |
+| 8 | Contradictory | Explicitly contradicts the gold answer or question premise. |
+
+- The gold/reference answer defines the expected content.
+- The taxonomy captures (1) the relationship between gold and predicted answers and (2) common LLM-response patterns.
+- A good metric should score more correct answers higher than less correct ones.
+
+Dataset label names: `exact`, `equivalent`, `alternative_correct`, `overinclusive_valid`, `partial`, `overinclusive_invalid`, `invalid`, `contradictory`.
+
+## Monotonicity criteria for correctness
+
+exact ≈ equivalent ≈ alternative-correct ≥ overinclusive_valid > partial > overinclusive_invalid > invalid ≥ contradictory
+
+More correct classes should receive higher metric scores.
+
+## CAP and the evaluation framework
+
+CAP (Context-Aware Precision) is a reference-based metric for evaluating semantic correctness in open QA.
+
+Pipeline:
+
+1. Inputs: the gold answer g and the predicted answer p for a question q. Example: q = "Name a city in Bulgaria.", g = "Sofia", p = "Burgas".
+2. QA → statements: s_g := s(q, g) ("Sofia is a city in Bulgaria.") and s_p := s(q, p) ("Burgas is a city in Bulgaria."), where s is a fine-tuned question + answer → statement model.
+3. Scoring with bidirectional weighted NLI: g → p measures semantic compatibility; p → g measures semantic completeness.
+4. Output: CAP(g, p) ∈ [0, 1].
+
+Formulas:
+
+```
+D(s_g → s_p) := P_entailment(s_g → s_p) + λ · P_neutral(s_g → s_p)
+CAP(s_g, s_p) := α · D(s_g → s_p) + (1 − α) · D(s_p → s_g)
+```
+
+λ ∈ [0, 1] controls the contribution of the neutral class. The experiments use α = 0.85 and λ = 0.30.
+
+LaTeX:
+
+```latex
+D(s_g \to s_p) := P_{\text{entailment}}(s_g \to s_p) + \lambda\, P_{\text{neutral}}(s_g \to s_p)
+\mathit{CAP}(s_g, s_p) := \alpha\, D(s_g \to s_p) + (1 - \alpha)\, D(s_p \to s_g)
+```
+
+## Contributions
+
+- Taxonomy + dataset: 8 correctness classes, 8.8k examples.
+- Metric + reformulation data: CAP + 11k QA → statement triples.
+- Diagnostic protocol: checks monotonicity criteria for correctness and reveals metric failure modes.
+
+## Results
+
+How do we know whether a metric score reflects correctness?
+
+| Gold statement | Prediction statement | Relationship | CAP |
+|---|---|---|---|
+| Water boils at 100°C | Water boils at 0 °C | contradictory | 0.01 |
+| Water boils at 100°C | The boiling point of water is 100°C | equivalent | 0.98 |
+
+The taxonomy is used as a human-interpretable target ordering.
+
+Pairwise accuracy (%), chance = 50:
+
+| Metric | Pairwise accuracy |
+|---|---|
+| CAP | 77.70 |
+| COMET | 61.10 |
+| BERTScore | 56.18 |
+| ROUGE-L | 55.35 |
+| METEOR | 53.71 |
+| BLEU | 51.57 |
+
+Monotonicity violations (out of 25 class pairs): CAP 4/25, COMET 9/25, BERTScore 11/25.
+
+Evaluators in the study often fail to preserve the intended semantic correctness ordering.
+
+Does the taxonomy generalize to real LLM outputs? In 3,000 responses from 3 LLM families, (1) all eight taxonomy classes appeared and (2) CAP largely preserved the semantic ordering.
+
+## Reusable resources
+
+CAP-Correctness (`data/CAP-Correctness.csv`, https://raw.githubusercontent.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-/main/data/CAP-Correctness.csv):
+
+- 8,827 examples: question, gold, predicted, label
+- 8 semantic correctness classes
+- Questions from OpenBookQA, ARC and MMLU
+- 1,638 human labeled; κ = .779 human–LLM agreement
+- Columns: question, dataset, gold_answer, answer, hypothesis, premise, label_semantic, label_semantic_manual
+- Paper split: `data/CAP-Correctness-splits.csv` maps row_id → validation (1,000) / test (7,827)
+
+CAP-Statements (`data/CAP-Statements.csv`, https://raw.githubusercontent.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-/main/data/CAP-Statements.csv):
+
+- 11,000 examples: question, answer, statement
+- 4 question types
+- train/dev/test reformulation splits
+- 1,353 manually checked; 90% correct
+- Columns: id, language, subject, question, answer, statement, label_question_type
+
+## Using CAP
+
+```bash
+pip install -e .
+```
+
+```python
+from cap_eval import CAPScorer
+
+scorer = CAPScorer()  # cross-encoder/nli-deberta-v3-large, pinned revision
+scorer.score(
+    ["The powerhouse of the cell is the mitochondria."],   # premises (gold)
+    ["The mitochondria is the powerhouse of the cell."],   # hypotheses (candidate)
+)
+
+# Raw (question, gold answer, answer) triples need a trained statement model:
+scorer = CAPScorer(statement_model="outputs/statement_model/final")
+scorer.score_answers(["What is the powerhouse of the cell?"], ["mitochondria"], ["the mitochondrion"])
+```
+
+See the repository README for training the statement model and reproducing the results.
+
+## License
+
+Code: MIT. Original annotations (correctness labels and generated statements): CC BY 4.0. The questions and answers drawn from ARC-Easy (CC BY-SA 4.0), OpenBookQA (Apache 2.0) and MMLU (MIT) keep their original licenses. Details: https://github.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-/blob/main/DATA_LICENSES.md
+
+## Citation
+
+```bibtex
+@inproceedings{yotkova2026correct,
+  title     = {How Correct Is Your Answer? A Semantic Correctness Framework for Open {QA} Evaluation},
+  author    = {Yotkova, Elitsa and Kastreva, Violeta and Velkov, Petar and Boyanov, Hristo and
+               Dimitrov, Dimitar and Nakov, Preslav and Koychev, Ivan},
+  booktitle = {Findings of the Association for Computational Linguistics: EMNLP 2026},
+  year      = {2026},
+  url       = {https://arxiv.org/abs/2609.01369}
+}
+```
