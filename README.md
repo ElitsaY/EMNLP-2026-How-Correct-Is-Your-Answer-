@@ -1,6 +1,6 @@
 # ✅ How Correct Is Your Answer? A Semantic Correctness Framework for Open QA Evaluation
 
-**Findings of EMNLP 2026** · [Paper (arXiv:2609.01369)](https://arxiv.org/abs/2609.01369) · [Poster](assets/poster.pdf)
+**Findings of EMNLP 2026** · [Project page](https://elitsay.github.io/EMNLP-2026-How-Correct-Is-Your-Answer-/) · [Paper (arXiv:2609.01369)](https://arxiv.org/abs/2609.01369) · [Poster](assets/poster.pdf)
 
 Data and code for **CAP**, an NLI-based metric for judging QA answer correctness, benchmarked against standard NLG metrics (BLEU, ROUGE-L, METEOR, BERTScore, COMET) on questions from ARC-Easy, OpenBookQA, and MMLU.
 
