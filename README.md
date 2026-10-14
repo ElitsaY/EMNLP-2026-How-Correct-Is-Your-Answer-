@@ -1,10 +1,14 @@
-# EMNLP 2026 — How Correct Is Your Answer?
+# ✅ How Correct Is Your Answer? A Semantic Correctness Framework for Open QA Evaluation
+
+**Findings of EMNLP 2026** · [Paper (arXiv:2609.01369)](https://arxiv.org/abs/2609.01369) · [Poster](assets/poster.pdf)
 
 Data and code for **CAP**, an NLI-based metric for judging QA answer correctness, benchmarked against standard NLG metrics (BLEU, ROUGE-L, METEOR, BERTScore, COMET) on questions from ARC-Easy, OpenBookQA, and MMLU.
 
 ## How CAP works
 
 A fine-tuned mT5 model turns *(question, gold answer)* into a declarative **premise** and *(question, candidate answer)* into a **hypothesis**. An NLI cross-encoder then scores both directions:
+
+![CAP pipeline: gold and predicted answers are turned into statements, scored with bidirectional weighted NLI, and combined into CAP(g, p) in [0, 1]](assets/cap_schema.png)
 
 ```
 dir(a → b) = P(entailment | a, b) + 0.3 · P(neutral | a, b)
@@ -53,6 +57,7 @@ scorer.score_answers(["What is the powerhouse of the cell?"], ["mitochondria"], 
 │   ├── CAP-Correctness.csv          # 8,827 labeled QA rows with premise/hypothesis statements
 │   ├── CAP-Correctness-splits.csv   # row_id → validation (1,000) / test (7,827), as in the paper
 │   └── CAP-Statements.csv           # 11,000 question/answer/statement training examples
+├── assets/                     # poster (PDF and preview) and the CAP pipeline figure
 ├── pyproject.toml
 └── requirements.txt
 ```
@@ -111,6 +116,10 @@ pytest
 ```
 
 The pairwise statistics are checked against brute-force implementations.
+
+## Poster
+
+[![Poster: How Correct Is Your Answer?](assets/poster_preview.png)](assets/poster.pdf)
 
 ## License
 
