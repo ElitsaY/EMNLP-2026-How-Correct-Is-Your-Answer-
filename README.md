@@ -44,6 +44,7 @@ scorer.score_answers(["What is the powerhouse of the cell?"], ["mitochondria"], 
 ├── scripts/
 │   ├── evaluate_dataset.py     # score CAP-Correctness with CAP and benchmark it against the baselines
 │   ├── score_baselines.py      # BLEU, ROUGE-L, METEOR, BERTScore, COMET
+│   ├── run_comet_eval.py       # standalone COMET run with per-label stats
 │   └── train_statement_model.py  # fine-tune the question + answer → statement model
 ├── tests/
 │   ├── test_scorer.py
@@ -70,6 +71,12 @@ Results are reported on the test split by default, as in the paper (`--split val
 ```bash
 python scripts/train_statement_model.py                                          # -> outputs/statement_model/final
 python scripts/evaluate_dataset.py --statement-model outputs/statement_model/final
+```
+
+To run COMET on its own and print its score stats per label:
+
+```bash
+python scripts/run_comet_eval.py      # -> outputs/scores/comet_eval.csv
 ```
 
 Run each script with `--help` for its options, e.g. `--baselines` (compare against a subset, or none), `--device`, `--n-bootstrap`, `--reuse-cap-scores`.
