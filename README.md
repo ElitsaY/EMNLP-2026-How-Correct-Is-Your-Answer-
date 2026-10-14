@@ -4,6 +4,19 @@
 
 Data and code for **CAP**, an NLI-based metric for judging QA answer correctness, benchmarked against standard NLG metrics (BLEU, ROUGE-L, METEOR, BERTScore, COMET) on questions from ARC-Easy, OpenBookQA, and MMLU.
 
+## Why is open QA evaluation hard?
+
+- Free-form answers often have no explicit correctness label.
+- A gold answer gives us a **semantic anchor**, not a string to match.
+- Binary accept/reject judgments hide important distinctions.
+- Answers can be partial, overinclusive, unsupported, contradictory, or based on a false premise.
+
+### Correctness is not binary
+
+![Question: Name 3 cities in Europe. Gold: Paris, Rome, Sofia. Overinclusive invalid: Paris, Berlin, Tokyo. Partial: Oslo, Amsterdam. Overinclusive valid: Paris, Berlin, Sofia, all of which have a population over 1.2 million people.](assets/correctness_not_binary.png)
+
+Not every answer is simply **correct** or **wrong**. Correctness comes in different semantic forms and degrees.
+
 ## How CAP works
 
 A fine-tuned mT5 model turns *(question, gold answer)* into a declarative **premise** and *(question, candidate answer)* into a **hypothesis**. An NLI cross-encoder then scores both directions:
@@ -57,7 +70,7 @@ scorer.score_answers(["What is the powerhouse of the cell?"], ["mitochondria"], 
 │   ├── CAP-Correctness.csv          # 8,827 labeled QA rows with premise/hypothesis statements
 │   ├── CAP-Correctness-splits.csv   # row_id → validation (1,000) / test (7,827), as in the paper
 │   └── CAP-Statements.csv           # 11,000 question/answer/statement training examples
-├── assets/                     # poster (PDF and preview) and the CAP pipeline figure
+├── assets/                     # poster (PDF and preview) and README figures
 ├── pyproject.toml
 └── requirements.txt
 ```
