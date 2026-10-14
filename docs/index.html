@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Correct Is Your Answer? | CAP</title>
+<meta name="description" content="CAP (Context-Aware Precision): a semantic correctness framework for open QA evaluation. Findings of EMNLP 2026.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root {
+  --bg: #fbf8f3;
+  --surface: #ffffff;
+  --ink: #1f1d2b;
+  --muted: #5d5a6e;
+  --line: #3b3654;
+  --soft-line: #e4dfd6;
+  --pill: #fcefdc;
+  --gold: #fdeea0;
+  --pred: #e3effa;
+  --stmt: #eef3f7;
+  --score: #e9e5f6;
+  --cap: #e3f1dc;
+  --c1: #4f8a10;
+  --c4: #b3a400;
+  --c5: #f2a900;
+  --c6: #f26a00;
+  --c7: #e5301c;
+  --c8: #c00d0d;
+  --accent: #e5301c;
+  --link: #3c5bd6;
+  --shadow: 0 1px 0 rgba(31, 29, 43, .04), 0 8px 24px -12px rgba(31, 29, 43, .18);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15141c;
+    --surface: #1e1d28;
+    --ink: #ece9f4;
+    --muted: #a7a3b8;
+    --line: #8c86b0;
+    --soft-line: #34324a;
+    --pill: #3a2f22;
+    --gold: #4a4320;
+    --pred: #22344a;
+    --stmt: #26303a;
+    --score: #2e2a45;
+    --cap: #263a24;
+    --c1: #8bc34a;
+    --c4: #d7c832;
+    --c5: #ffc23a;
+    --c6: #ff8a3a;
+    --c7: #ff5a47;
+    --c8: #ff4d4d;
+    --accent: #ff5a47;
+    --link: #8ea6ff;
+    --shadow: 0 8px 24px -12px rgba(0, 0, 0, .6);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15141c; --surface: #1e1d28; --ink: #ece9f4; --muted: #a7a3b8; --line: #8c86b0; --soft-line: #34324a;
+  --pill: #3a2f22; --gold: #4a4320; --pred: #22344a; --stmt: #26303a; --score: #2e2a45; --cap: #263a24;
+  --c1: #8bc34a; --c4: #d7c832; --c5: #ffc23a; --c6: #ff8a3a; --c7: #ff5a47; --c8: #ff4d4d;
+  --accent: #ff5a47; --link: #8ea6ff; --shadow: 0 8px 24px -12px rgba(0, 0, 0, .6);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 17px/1.6 "Open Sans", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--link); }
+img { max-width: 100%; display: block; }
+h1, h2, h3 { font-family: Poppins, system-ui, sans-serif; line-height: 1.2; margin: 0; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+/* ---------- nav ---------- */
+nav {
+  position: sticky; top: 0; z-index: 10;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--soft-line);
+}
+nav .wrap { display: flex; align-items: center; gap: 20px; height: 54px; overflow-x: auto; scrollbar-width: none; }
+nav .wrap::-webkit-scrollbar { display: none; }
+nav .brand { font-family: Poppins, sans-serif; font-weight: 800; color: var(--ink); text-decoration: none; white-space: nowrap; }
+nav .links { display: flex; gap: 18px; margin-left: auto; }
+nav .links a { color: var(--muted); text-decoration: none; font-size: 15px; font-weight: 600; white-space: nowrap; }
+nav .links a:hover { color: var(--ink); }
+#theme {
+  border: 1px solid var(--soft-line); background: var(--surface); color: var(--ink);
+  border-radius: 999px; width: 34px; height: 34px; cursor: pointer; flex: none; font-size: 16px;
+}
+
+/* ---------- hero ---------- */
+header.hero { padding: 56px 0 28px; }
+.hero-grid { display: grid; grid-template-columns: 1fr 220px; gap: 32px; align-items: center; }
+.venue {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 999px;
+  padding: 4px 14px; font-weight: 700; font-size: 14px; letter-spacing: .02em;
+}
+.venue .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+.hero h1 { font-size: clamp(36px, 6vw, 60px); font-weight: 800; margin: 18px 0 6px; letter-spacing: -.01em; }
+.grad {
+  background: linear-gradient(90deg, var(--c1) 0%, var(--c4) 40%, var(--c5) 60%, var(--c7) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.hero .subtitle { font-family: "Open Sans", sans-serif; font-style: italic; font-weight: 700; font-size: clamp(20px, 2.8vw, 30px); margin: 0 0 18px; }
+.authors { color: var(--muted); font-style: italic; margin: 0; }
+.affil { font-weight: 700; font-style: italic; color: var(--ink); margin: 2px 0 0; }
+.affil small { font-weight: 400; color: var(--muted); margin-left: 10px; }
+.buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 18px; border-radius: 999px; font-weight: 700; font-size: 15px; text-decoration: none;
+  border: 1.5px solid var(--line); color: var(--ink); background: var(--surface);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+@media (hover: hover) { .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); } }
+.btn.primary { background: var(--line); color: var(--bg); }
+.btn svg { width: 17px; height: 17px; }
+.mascot img { width: 100%; }
+.tldr {
+  margin-top: 36px; border: 2px solid var(--line); border-radius: 20px; background: var(--surface);
+  padding: 14px 22px; font-weight: 700; font-size: clamp(16px, 2vw, 20px); text-align: center; box-shadow: var(--shadow);
+}
+
+/* ---------- sections ---------- */
+section { padding: 44px 0 8px; scroll-margin-top: 60px; }
+.panel {
+  background: var(--surface); border: 2px solid var(--line); border-radius: 22px;
+  padding: 0 28px 28px; box-shadow: var(--shadow);
+}
+.panel > h2 {
+  display: table; margin: -22px auto 22px; background: var(--pill); border: 2px solid var(--line);
+  border-radius: 999px; padding: 8px 26px; font-size: clamp(19px, 2.4vw, 25px); font-weight: 700; text-align: center;
+}
+.panel + .panel { margin-top: 48px; }
+.panel h3 { font-size: 19px; margin: 26px 0 12px; }
+.lead { font-size: 18px; }
+ul.points { padding-left: 22px; margin: 0; }
+ul.points li { margin: 6px 0; }
+.ok { color: var(--c1); font-weight: 700; }
+.bad { color: var(--c7); font-weight: 700; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.callout { margin-top: 18px; font-weight: 700; font-size: 18px; }
+
+/* example table */
+.example { display: grid; grid-template-columns: 1fr 170px; gap: 24px; align-items: center; }
+.ex-rows { display: grid; grid-template-columns: 210px 1fr; gap: 12px 18px; align-items: center; }
+.tag { border: 2px solid var(--ink); border-radius: 999px; text-align: center; padding: 3px 10px; font-weight: 600; }
+.tag.q { background: var(--stmt); }
+.tag.g { background: var(--gold); }
+.lbl { text-align: center; font-weight: 700; }
+.stamp { width: 100%; max-width: 170px; transform: rotate(3deg); }
+
+/* taxonomy */
+.taxo { display: grid; grid-template-columns: 96px 1fr; gap: 18px; }
+.axis { display: flex; flex-direction: column; align-items: center; font-family: Poppins, sans-serif; font-weight: 700; font-size: 20px; }
+.axis .bar {
+  flex: 1; width: 16px; margin: 8px 0; border-radius: 8px; position: relative;
+  background: linear-gradient(var(--c1), var(--c4) 40%, var(--c5) 55%, var(--c6) 75%, var(--c8));
+}
+.axis .bar::before, .axis .bar::after { content: ""; position: absolute; left: 50%; transform: translateX(-50%); border: 16px solid transparent; }
+.axis .bar::before { top: -24px; border-bottom-color: var(--c1); border-top: 0; }
+.axis .bar::after { bottom: -24px; border-top-color: var(--c8); border-bottom: 0; }
+.axis .top { color: var(--c1); padding-bottom: 14px; }
+.axis .bottom { color: var(--c7); padding-top: 14px; }
+.classes { display: grid; gap: 10px; }
+.cls {
+  display: grid; grid-template-columns: 34px 190px 1fr 30px; gap: 14px; align-items: center;
+  border: 2px solid var(--ink); border-radius: 12px; padding: 8px 14px; background: var(--surface);
+  transition: transform .15s ease;
+}
+@media (hover: hover) { .cls:hover { transform: translateX(4px); } }
+.cls .n { width: 32px; height: 32px; border-radius: 7px; color: #fff; font-weight: 700; display: grid; place-items: center; background: var(--c); }
+.cls .name { color: var(--c); font-weight: 700; line-height: 1.2; }
+.cls .desc { line-height: 1.35; }
+.cls svg { width: 28px; height: 28px; color: var(--c); }
+
+/* monotonicity */
+.mono { text-align: center; font-style: italic; font-weight: 700; font-size: clamp(16px, 2.2vw, 21px); line-height: 1.7; }
+.mono .op { color: var(--ink); font-style: normal; padding: 0 4px; }
+.mono-note { text-align: center; color: var(--muted); margin: 6px 0 0; }
+
+/* pipeline */
+.pipeline { display: grid; grid-template-columns: 1.1fr auto 1fr auto 1.1fr auto .62fr; align-items: center; gap: 8px; margin: 8px 0 26px; }
+.arrow { font-weight: 800; font-size: 24px; letter-spacing: -3px; color: var(--ink); padding-right: 3px; line-height: 1; }
+.box { border: 2px solid var(--ink); border-radius: 16px; background: var(--surface); overflow: hidden; }
+.box > .hd { text-align: center; font-weight: 600; padding: 4px 8px; border-bottom: 2px solid var(--ink); }
+.box > .bd { padding: 10px; }
+.qa { display: grid; grid-template-columns: 1fr 74px; gap: 8px; align-items: center; font-style: italic; font-size: 14px; line-height: 1.35; }
+.qa img { width: 74px; height: 56px; object-fit: cover; border-radius: 9px; }
+.stack { display: grid; gap: 12px; }
+.stmt { border: 2px solid var(--ink); border-radius: 14px; background: var(--stmt); text-align: center; padding: 8px 6px; font-size: 14px; line-height: 1.35; }
+.stmt .f { font-size: 17px; display: block; margin-bottom: 2px; }
+.dir { border: 2px solid var(--ink); border-radius: 14px; background: var(--score); display: grid; grid-template-columns: 54px 1fr; align-items: center; padding: 8px 10px; font-size: 14px; line-height: 1.25; }
+.dir b { font-size: 17px; }
+.cap-out { text-align: center; }
+.cap-out .bd { font-weight: 700; font-size: 17px; }
+.formula { text-align: center; font-size: 20px; overflow-x: auto; padding: 6px 0; }
+.formula.cap { color: var(--accent); }
+.formula.narrow { display: none; }
+.note { color: var(--muted); text-align: center; margin: 0; }
+
+/* contributions & results */
+.contrib li b { font-weight: 700; }
+.pairs { display: grid; grid-template-columns: auto 1fr auto auto; gap: 8px 12px; align-items: center; font-size: 14.5px; margin-top: 8px; }
+.pairs .h { color: var(--muted); font-weight: 600; text-align: center; }
+.chip { border-radius: 999px; padding: 3px 12px; border: 1.5px solid; text-align: center; white-space: nowrap; }
+.chip.g { background: var(--gold); border-color: #d6b400; }
+.chip.p { background: var(--pred); border-color: #8fb3d9; }
+.chip.r1 { color: var(--c8); border-color: var(--c8); font-style: italic; font-weight: 700; }
+.chip.r2 { color: var(--c1); border-color: var(--c1); font-style: italic; font-weight: 700; }
+.chip.s1 { background: color-mix(in srgb, var(--c8) 12%, var(--surface)); border-color: var(--c8); }
+.chip.s2 { background: color-mix(in srgb, var(--c1) 12%, var(--surface)); border-color: var(--c1); }
+.results { display: grid; grid-template-columns: 1fr 200px; gap: 28px; align-items: center; margin-top: 10px; }
+.chart { position: relative; padding: 22px 0 30px 90px; }
+.chart .row { display: grid; grid-template-columns: 1fr; height: 34px; align-items: center; position: relative; }
+.chart .name { position: absolute; left: -90px; width: 80px; text-align: right; font-size: 14px; font-weight: 600; }
+.chart .fill { height: 24px; border-radius: 0 6px 6px 0; width: 0; transition: width 1s cubic-bezier(.2, .8, .2, 1); position: relative; }
+.chart .fill span { position: absolute; left: calc(100% + 8px); top: 50%; transform: translateY(-50%); font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.chart .chance { position: absolute; top: 18px; bottom: 26px; border-left: 2px dashed var(--muted); opacity: .7; }
+.chart .chance em { position: absolute; top: -20px; left: 4px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.chart .axisx { position: absolute; left: 90px; right: 0; bottom: 0; height: 18px; font-size: 12px; color: var(--muted); }
+.chart .axisx span { position: absolute; transform: translateX(-50%); }
+.chart-cap { text-align: center; color: var(--muted); font-size: 14px; margin: 4px 0 0; }
+.viol { text-align: center; }
+.viol h4 { margin: 0 0 6px; font-family: Poppins, sans-serif; font-weight: 600; font-size: 17px; }
+.viol div { margin: 8px 0; }
+.viol b { display: block; font-family: Poppins, sans-serif; }
+.warn {
+  display: flex; gap: 14px; align-items: center; margin-top: 22px;
+  border: 2px solid var(--c7); border-radius: 16px; padding: 12px 18px;
+  background: color-mix(in srgb, var(--c7) 9%, var(--surface));
+}
+.warn svg { flex: none; width: 34px; height: 34px; color: var(--c7); }
+
+/* resources */
+.res { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.card { border: 2px solid var(--ink); border-radius: 16px; overflow: hidden; background: var(--surface); text-align: center; }
+.card .hd { padding: 6px; border-bottom: 2px solid var(--ink); font-weight: 600; font-size: 18px; }
+.card .bd { padding: 14px 18px 18px; }
+.card .big { font-family: Poppins, sans-serif; font-weight: 800; font-size: 40px; line-height: 1.1; }
+.card p { margin: 4px 0; color: var(--muted); font-size: 15px; }
+.card .hl { color: var(--c1); font-weight: 700; font-size: 19px; margin-top: 10px; }
+.card .hl.blue { color: var(--link); }
+
+/* usage, poster, cite */
+pre {
+  background: #1f1d2b; color: #ece9f4; border-radius: 14px; padding: 16px 18px; overflow-x: auto;
+  font: 14px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; margin: 0;
+}
+pre .c { color: #9a96b0; }
+pre .s { color: #b8e07a; }
+pre .k { color: #ffb86b; }
+.poster { display: grid; grid-template-columns: 300px 1fr; gap: 30px; align-items: center; }
+.poster img { border-radius: 10px; border: 1px solid var(--soft-line); box-shadow: var(--shadow); }
+.cite { position: relative; }
+.cite pre { padding-top: 46px; }
+.copy {
+  position: absolute; top: 10px; right: 10px; border: 1px solid #4a4760; background: #2c2a3b; color: #ece9f4;
+  border-radius: 8px; padding: 4px 10px; font: 600 13px "Open Sans", sans-serif; cursor: pointer;
+}
+footer { padding: 48px 0 40px; color: var(--muted); font-size: 14px; text-align: center; }
+footer img { width: 64px; margin: 0 auto 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .chart .fill { transition: none; }
+  html { scroll-behavior: auto; }
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 900px) {
+  .pipeline { grid-template-columns: 1fr; }
+  .arrow { transform: rotate(90deg); justify-self: center; padding: 0; letter-spacing: -3px; font-size: 26px; line-height: 1; }
+  .results, .poster { grid-template-columns: minmax(0, 1fr); }
+  .poster a:first-child { display: block; max-width: 320px; width: 100%; margin: 0 auto; }
+}
+@media (max-width: 720px) {
+  body { font-size: 16px; }
+  .wrap { padding: 0 16px; }
+  nav .wrap { gap: 12px; }
+  nav .links { margin-left: 0; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; gap: 14px; }
+  nav .links::-webkit-scrollbar { display: none; }
+  nav .links a { font-size: 14px; }
+  .hero-grid { grid-template-columns: 1fr; }
+  .mascot { width: 150px; justify-self: center; order: -1; }
+  header.hero { padding-top: 36px; }
+  .panel { padding: 0 16px 20px; border-radius: 18px; }
+  .two, .res { grid-template-columns: 1fr; }
+  .example { grid-template-columns: 1fr; }
+  .stamp { max-width: 120px; margin: 0 auto; }
+  .ex-rows { grid-template-columns: 1fr; gap: 4px; }
+  .ex-rows > :nth-child(2n) { margin-bottom: 10px; }
+  .ex-rows .tag, .ex-rows .lbl { justify-self: start; text-align: left; }
+  .ex-rows .tag { min-width: 120px; }
+  .taxo { grid-template-columns: 1fr; }
+  .axis { display: none; }
+  .cls { grid-template-columns: 32px 1fr 26px; }
+  .cls .desc { grid-column: 2 / 4; font-size: 15px; }
+  .cls svg { grid-row: 1; grid-column: 3; }
+  .cite pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; }
+  .viol { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .viol h4 { grid-column: 1 / -1; }
+  .pairs { grid-template-columns: 1fr 1fr; gap: 6px 8px; }
+  .pairs .chip { white-space: normal; }
+  .pairs .chip.g, .pairs .chip.p { grid-column: 1 / -1; }
+  .pairs .chip.s1 { margin-bottom: 14px; }
+  .pairs .h { display: none; }
+  .formula { font-size: 15px; }
+  .formula.wide { display: none; }
+  .formula.narrow { display: block; }
+}
+@media (max-width: 360px) {
+  .wrap { padding: 0 12px; }
+  .panel { padding: 0 12px 18px; }
+  .formula { font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#top">CAP</a>
+    <div class="links">
+      <a href="#problem">Problem</a>
+      <a href="#taxonomy">Taxonomy</a>
+      <a href="#cap">CAP</a>
+      <a href="#results">Results</a>
+      <a href="#resources">Resources</a>
+      <a href="#cite">Cite</a>
+    </div>
+    <button id="theme" type="button" aria-label="Toggle dark mode">◐</button>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <span class="venue"><span class="dot"></span>Findings of EMNLP 2026</span>
+        <h1>How <span class="grad">Correct</span> Is Your Answer?</h1>
+        <p class="subtitle">A Semantic Correctness Framework for Open QA Evaluation</p>
+        <p class="authors">Elitsa Yotkova*, Violeta Kastreva*, Petar Velkov, Hristo Boyanov, Dimitar Dimitrov, Preslav Nakov, Ivan Koychev</p>
+        <p class="affil">Sofia University • ETH Zurich • University of Zurich • MBZUAI <small>*equal contribution</small></p>
+        <div class="buttons">
+          <a class="btn primary" href="https://arxiv.org/abs/2609.01369">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>
+            Paper
+          </a>
+          <a class="btn" href="https://github.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.39-5.25 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>
+            Code &amp; Data
+          </a>
+          <a class="btn" href="https://github.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-/blob/main/assets/poster.pdf">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 15l5-5 4 4 3-3 6 6"/><circle cx="16" cy="8" r="1.5"/></svg>
+            Poster
+          </a>
+          <a class="btn" href="#cite">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h4v4c0 3-2 5-4 6M15 7h4v4c0 3-2 5-4 6"/></svg>
+            BibTeX
+          </a>
+        </div>
+      </div>
+      <div class="mascot" aria-hidden="true">
+        <img src="assets/capybara.png" alt="">
+      </div>
+    </div>
+    <div class="tldr">Semantic correctness as an ordered taxonomy, with monotonicity as the evaluation criterion.</div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section id="problem">
+    <div class="panel">
+      <h2>Why Is Open QA Evaluation Hard?</h2>
+      <ul class="points lead">
+        <li>Free-form answers often have no explicit correctness label.</li>
+        <li>A gold answer gives us a <b>semantic anchor</b>, not a string to match.</li>
+        <li>Binary <span class="ok">accept</span>/<span class="bad">reject</span> judgments hide important distinctions.</li>
+        <li>Answers can be partial, overinclusive, unsupported, contradictory, or based on a false premise.</li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <h2>Correctness Is Not Binary</h2>
+      <div class="example">
+        <div class="ex-rows">
+          <div class="tag q">Question</div><div>Name 3 cities in Europe</div>
+          <div class="tag g">Gold</div><div>Paris, Rome, Sofia</div>
+          <div class="lbl" style="color: var(--c6)">Overinclusive invalid</div><div>Paris, Berlin, <b style="color: var(--c7)">Tokyo</b></div>
+          <div class="lbl" style="color: var(--c5)">Partial</div><div>Oslo, Amsterdam</div>
+          <div class="lbl" style="color: var(--c4)">Overinclusive valid</div><div>Paris, Berlin, Sofia, all of which have a <b style="color: var(--c1)">population over 1.2 million people</b></div>
+        </div>
+        <img class="stamp" src="assets/stamp.png" alt="Tokyo, Japan postage stamp">
+      </div>
+      <p class="callout">Not every answer is simply <span class="ok">correct</span> or <span class="bad">wrong</span>. Correctness comes in different semantic forms and degrees.</p>
+    </div>
+  </section>
+
+  <section id="taxonomy">
+    <div class="panel">
+      <h2>How Should We Classify Correctness Instead?</h2>
+      <div class="taxo">
+        <div class="axis" aria-hidden="true">
+          <div class="top">✓<br>Correct</div>
+          <div class="bar"></div>
+          <div class="bottom">Wrong<br>✕</div>
+        </div>
+        <div class="classes">
+          <div class="cls" style="--c: var(--c1)"><span class="n">1</span><span class="name">Exact</span><span class="desc">Prediction is identical to the gold answer.</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg></div>
+          <div class="cls" style="--c: var(--c1)"><span class="n">2</span><span class="name">Equivalent</span><span class="desc">Rephrased or semantically equivalent to the gold answer.</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8 10h8M8 14h8"/></svg></div>
+          <div class="cls" style="--c: var(--c1)"><span class="n">3</span><span class="name">Alternative Correct</span><span class="desc">Different answer, but still correct under the question.</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16.5 9.5"/></svg></div>
+          <div class="cls" style="--c: var(--c4)"><span class="n">4</span><span class="name">Overinclusive Valid</span><span class="desc">Contains the correct answer plus extra valid information.</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></div>
+          <div class="cls" style="--c: var(--c5)"><span class="n">5</span><span class="name">Partial</span><span class="desc">Contains only part of the required information.</span>
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="currentColor"/><path d="M12 3v9h9" fill="none" stroke="var(--surface)" stroke-width="2.2"/></svg></div>
+          <div class="cls" style="--c: var(--c6)"><span class="n">6</span><span class="name">Overinclusive Invalid</span><span class="desc">Contains the correct answer plus extra invalid information.</span>
+            <svg viewBox="0 0 24 24"><path d="M12 2.5L22.5 21h-21z" fill="currentColor"/><path d="M12 9v5.5M12 17.2v.3" stroke="var(--surface)" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+          <div class="cls" style="--c: var(--c7)"><span class="n">7</span><span class="name">Invalid</span><span class="desc">Semantically incorrect answer.</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg></div>
+          <div class="cls" style="--c: var(--c8)"><span class="n">8</span><span class="name">Contradictory</span><span class="desc">Explicitly contradicts the gold answer or question premise.</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M5.7 5.7l12.6 12.6"/></svg></div>
+        </div>
+      </div>
+      <ul class="points" style="margin-top: 20px">
+        <li>The gold/reference answer defines the expected content.</li>
+        <li>The taxonomy captures (1) the relationship between gold and predicted answers and (2) <i>common LLM-response patterns</i>.</li>
+        <li>A good metric should <b>score more correct answers higher than less correct ones</b>.</li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <h2>Monotonicity Criteria for Correctness</h2>
+      <p class="mono">
+        <span style="color: var(--c1)">exact ≈ equivalent ≈ alternative-correct</span>
+        <span class="op">≥</span> <span style="color: var(--c4)">overinclusive_valid</span>
+        <span class="op">&gt;</span> <span style="color: var(--c5)">partial</span>
+        <span class="op">&gt;</span><br>
+        <span style="color: var(--c6)">overinclusive_invalid</span>
+        <span class="op">&gt;</span> <span style="color: var(--c7)">invalid</span>
+        <span class="op">≥</span> <span style="color: var(--c8)">contradictory</span>
+      </p>
+      <p class="mono-note">More correct classes should receive higher metric scores.</p>
+    </div>
+  </section>
+
+  <section id="cap">
+    <div class="panel">
+      <h2>CAP &amp; Our Evaluation Framework</h2>
+      <p class="lead"><b>CAP</b> (Context-Aware Precision) is a reference-based metric for evaluating semantic correctness in open QA.</p>
+
+      <div class="pipeline">
+        <div class="stack">
+          <div class="box">
+            <div class="hd" style="background: var(--gold)">Gold Answer</div>
+            <div class="bd qa"><div><b>Q</b>: Name a city in Bulgaria.<br><b>A</b>: Sofia</div><img src="assets/sofia.jpg" alt="Sofia"></div>
+          </div>
+          <div class="box">
+            <div class="hd" style="background: var(--pred)">Predicted Answer</div>
+            <div class="bd qa"><div><b>Q</b>: Name a city in Bulgaria.<br><b>A</b>: Burgas</div><img src="assets/burgas.jpg" alt="Burgas"></div>
+          </div>
+        </div>
+        <div class="arrow" aria-hidden="true">›››</div>
+        <div class="box">
+          <div class="hd" style="background: var(--stmt)">QA → Statements</div>
+          <div class="bd stack">
+            <div class="stmt"><span class="f">\(s_g := s(q, g)\)</span><i><b>Sofia is</b> a city in Bulgaria.</i></div>
+            <div class="stmt"><span class="f">\(s_p := s(q, p)\)</span><i><b>Burgas is</b> a city in Bulgaria.</i></div>
+          </div>
+        </div>
+        <div class="arrow" aria-hidden="true">›››</div>
+        <div class="box">
+          <div class="hd" style="background: var(--score)">Scoring</div>
+          <div class="bd stack">
+            <div style="text-align: center; line-height: 1.3">Bidirectional<br>weighted NLI</div>
+            <div class="dir"><b>g → p</b><span>semantic compatibility</span></div>
+            <div class="dir"><b>p → g</b><span>semantic completeness</span></div>
+          </div>
+        </div>
+        <div class="arrow" aria-hidden="true">›››</div>
+        <div class="box cap-out">
+          <div class="hd" style="background: var(--cap)">CAP</div>
+          <div class="bd">CAP(g,p)<br><span style="font-weight: 400">∈ [0, 1]</span></div>
+        </div>
+      </div>
+
+      <div class="formula wide">\[ D(s_g \to s_p) := P_{\text{entailment}}(s_g \to s_p) + \lambda\, P_{\text{neutral}}(s_g \to s_p) \]</div>
+      <div class="formula narrow">\[ \begin{aligned} D(s_g \to s_p) := {} &P_{\text{entailment}}(s_g \to s_p) \\ &+ \lambda\, P_{\text{neutral}}(s_g \to s_p) \end{aligned} \]</div>
+      <p class="note">where \(\lambda \in [0, 1]\) controls the contribution of the neutral class</p>
+      <div class="formula cap wide">\[ \mathit{CAP}(s_g, s_p) := \alpha\, D(s_g \to s_p) + (1 - \alpha)\, D(s_p \to s_g) \]</div>
+      <div class="formula cap narrow">\[ \begin{aligned} \mathit{CAP}(s_g, s_p) := {} &\alpha\, D(s_g \to s_p) \\ &+ (1 - \alpha)\, D(s_p \to s_g) \end{aligned} \]</div>
+      <p class="note">In our experiments, we use \(\alpha = 0.85\) and \(\lambda = 0.30\).</p>
+
+    </div>
+  </section>
+
+  <section id="results">
+    <div class="panel">
+      <h2>Our Contributions</h2>
+      <ul class="points contrib lead">
+        <li><b>Taxonomy + dataset</b>: 8 correctness classes, 8.8k examples</li>
+        <li><b>Metric + reformulation data</b>: CAP + 11k QA→statement triples</li>
+        <li><b>Diagnostic protocol</b>: checks monotonicity criteria for correctness and reveals metric <span class="bad">failure</span> modes</li>
+      </ul>
+
+      <h3>How do we know whether a metric score reflects correctness?</h3>
+      <div class="pairs">
+        <span class="h">Gold statement</span><span class="h">Prediction statement</span><span class="h">Relationship</span><span class="h">CAP</span>
+        <span class="chip g">Water boils at 100°C</span><span class="chip p">Water boils at 0 °C</span><span class="chip r1">contradictory</span><span class="chip s1">CAP 0.01</span>
+        <span class="chip g">Water boils at 100°C</span><span class="chip p">The boiling point of water is 100°C</span><span class="chip r2">equivalent</span><span class="chip s2">CAP 0.98</span>
+      </div>
+
+      <h3>We use our taxonomy as a human-interpretable target ordering.</h3>
+      <div class="results">
+        <div>
+          <div class="chart" id="chart">
+            <div class="chance" style="left: calc(90px + (100% - 90px) * .5)"><em>chance (50%)</em></div>
+            <div class="row"><span class="name">CAP</span><div class="fill" data-v="77.70" style="background: #5a9a1e"><span>77.70</span></div></div>
+            <div class="row"><span class="name">COMET</span><div class="fill" data-v="61.10" style="background: #b9c22a"><span>61.10</span></div></div>
+            <div class="row"><span class="name">BERTScore</span><div class="fill" data-v="56.18" style="background: #f5b22a"><span>56.18</span></div></div>
+            <div class="row"><span class="name">ROUGE-L</span><div class="fill" data-v="55.35" style="background: #f2862b"><span>55.35</span></div></div>
+            <div class="row"><span class="name">METEOR</span><div class="fill" data-v="53.71" style="background: #e9483a"><span>53.71</span></div></div>
+            <div class="row"><span class="name">BLEU</span><div class="fill" data-v="51.57" style="background: #c0202a"><span>51.57</span></div></div>
+            <div class="axisx"><span style="left: 0%">0</span><span style="left: 20%">20</span><span style="left: 40%">40</span><span style="left: 60%">60</span><span style="left: 80%">80</span><span style="left: 100%">100</span></div>
+          </div>
+          <p class="chart-cap">Pairwise accuracy (%)</p>
+        </div>
+        <div class="viol">
+          <h4>Monotonicity violations</h4>
+          <div><b>CAP</b>4/25</div>
+          <div><b>COMET</b>9/25</div>
+          <div><b>BERTScore</b>11/25</div>
+        </div>
+      </div>
+
+      <div class="warn">
+        <svg viewBox="0 0 24 24"><path d="M12 2.5L22.5 21h-21z" fill="currentColor"/><path d="M12 9v5.5M12 17.2v.3" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>
+        <span>Evaluators in our study often <b class="bad">fail</b> to preserve the intended semantic correctness ordering.</span>
+      </div>
+
+      <h3>Does the taxonomy generalize to real LLM outputs?</h3>
+      <p style="margin: 0">In 3,000 responses from 3 LLM families, (1) all eight taxonomy classes appeared, and (2) CAP largely preserved the semantic ordering.</p>
+    </div>
+  </section>
+
+  <section id="resources">
+    <div class="panel">
+      <h2>Reusable Resources</h2>
+      <div class="res">
+        <div class="card">
+          <div class="hd" style="background: var(--cap)">CAP-Correctness</div>
+          <div class="bd">
+            <div class="big" data-count="8827">8,827</div>
+            <p>question, gold, predicted, label</p>
+            <p>8 semantic correctness classes</p>
+            <p>OpenBookQA, ARC, MMLU</p>
+            <div class="hl">1,638 human labeled</div>
+            <p>κ = .779 human–LLM agreement</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="hd" style="background: var(--pred)">CAP-Statements</div>
+          <div class="bd">
+            <div class="big" data-count="11000">11,000</div>
+            <p>question, answer, statement</p>
+            <p>4 question types</p>
+            <p>train/dev/test reformulation</p>
+            <div class="hl blue">1,353 manually checked</div>
+            <p>90% correct</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Use CAP</h2>
+      <pre><span class="k">pip</span> install -e .
+
+<span class="k">from</span> cap_eval <span class="k">import</span> CAPScorer
+
+scorer = CAPScorer()  <span class="c"># cross-encoder/nli-deberta-v3-large, pinned revision</span>
+scorer.score(
+    [<span class="s">"The powerhouse of the cell is the mitochondria."</span>],   <span class="c"># premises (gold)</span>
+    [<span class="s">"The mitochondria is the powerhouse of the cell."</span>],   <span class="c"># hypotheses (candidate)</span>
+)</pre>
+      <p style="margin: 14px 0 0">See the <a href="https://github.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-">repository</a> for scoring raw (question, gold answer, answer) triples and for reproducing the results.</p>
+    </div>
+
+    <div class="panel">
+      <h2>Poster</h2>
+      <div class="poster">
+        <a href="https://github.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-/blob/main/assets/poster.pdf"><img src="assets/poster_preview.jpg" alt="Poster: How Correct Is Your Answer?" loading="lazy"></a>
+        <div>
+          <p class="lead" style="margin-top: 0">The full poster from EMNLP 2026 in Budapest.</p>
+          <a class="btn primary" href="https://github.com/ElitsaY/EMNLP-2026-How-Correct-Is-Your-Answer-/blob/main/assets/poster.pdf">Open the poster (PDF)</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="cite">
+    <div class="panel">
+      <h2>Citation</h2>
+      <div class="cite">
+        <button class="copy" type="button" id="copy">Copy</button>
+        <pre id="bibtex">@inproceedings{yotkova2026correct,
+  title     = {How Correct Is Your Answer? A Semantic Correctness Framework for Open {QA} Evaluation},
+  author    = {Yotkova, Elitsa and Kastreva, Violeta and Velkov, Petar and Boyanov, Hristo and
+               Dimitrov, Dimitar and Nakov, Preslav and Koychev, Ivan},
+  booktitle = {Findings of the Association for Computational Linguistics: EMNLP 2026},
+  year      = {2026},
+  url       = {https://arxiv.org/abs/2609.01369}
+}</pre>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <img src="assets/capybara_small.png" alt="">
+  Sofia University • ETH Zurich • University of Zurich • MBZUAI
+</footer>
+
+<script>
+(function () {
+  // theme toggle
+  var root = document.documentElement;
+  try { var saved = localStorage.getItem("cap-theme"); if (saved) root.dataset.theme = saved; } catch (e) {}
+  document.getElementById("theme").addEventListener("click", function () {
+    var dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem("cap-theme", root.dataset.theme); } catch (e) {}
+  });
+
+  // KaTeX
+  window.addEventListener("load", function () {
+    if (window.renderMathInElement) {
+      renderMathInElement(document.body, {
+        delimiters: [{ left: "\\[", right: "\\]", display: true }, { left: "\\(", right: "\\)", display: false }]
+      });
+    }
+  });
+
+  // chart bars grow in once the page has loaded
+  window.addEventListener("load", function () {
+    document.querySelectorAll("#chart .fill").forEach(function (f) { f.style.width = f.dataset.v + "%"; });
+  });
+
+  // copy BibTeX
+  document.getElementById("copy").addEventListener("click", function () {
+    var btn = this, text = document.getElementById("bibtex").textContent;
+    function done() { btn.textContent = "Copied"; setTimeout(function () { btn.textContent = "Copy"; }, 1500); }
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function () {});
+  });
+})();
+</script>
+</body>
+</html>
